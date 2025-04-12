@@ -1,0 +1,255 @@
+{
+  "name": "email summarization",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -480,
+        100
+      ],
+      "id": "c7723380-3504-4de2-847a-c7356a905643",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 45,
+        "simple": false,
+        "filters": {
+          "readStatus": "unread",
+          "receivedAfter": "2025-04-08T08:42:16"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -260,
+        100
+      ],
+      "id": "6449d04f-ca2b-4787-92de-946efa16efb6",
+      "name": "Gmail",
+      "webhookId": "0340bd6e-ffdc-4165-b04a-d1f60fb3ac20",
+      "retryOnFail": false,
+      "alwaysOutputData": false,
+      "notesInFlow": true,
+      "executeOnce": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5ofpG6ccgEiSWjVi",
+          "name": "mail unread"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "993f6bf1-278f-4312-b353-27f660903016",
+              "name": "=text",
+              "value": "={{ $json.textAsHtml.replace(/<[^>]+>/g, '').slice(0, 1000) }}",
+              "type": "string"
+            },
+            {
+              "id": "9c07cf97-4e59-414a-b21a-af0bb84e79ae",
+              "name": "=subject",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "03a9f6cb-773a-4bda-ae6d-fd2a0cdb14f4",
+              "name": "=sender",
+              "value": "={{ $json.from.value[0].address }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -40,
+        100
+      ],
+      "id": "8e30dd65-e1e2-465d-ad72-58d56bd2a7e3",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const subject = item.json.subject || 'No subject';\n  const sender = item.json.from || item.json.sender || 'No sender';\n  const textBody = item.json.text || '';\n  const htmlBody = item.json.html || '';\n  const rawBody = textBody || htmlBody || 'No body content available';\n\n  const body = rawBody\n    .replace(/(<([^>]+)>)/gi, \"\")  // remove HTML tags\n    .replace(/\\\\r|\\\\n/g, ' ')\n    .replace(/\\\\s+/g, ' ')\n    .trim()\n    .slice(0, 1000); // max 1000 characters\n\n  const prompt = `Summarize the following email in 3-4 bullet points. Include subject and sender in the response.\\n\\nSubject: ${subject}\\nFrom: ${sender}\\n\\nBody:\\n${body}`;\n\n  return {\n    json: {\n      prompt,\n      subject,\n      sender\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        180,
+        100
+      ],
+      "id": "7584a98f-f5d2-4470-a43c-f0ad68674a0b",
+      "name": "Code",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "bhilai100686@gmail.com ",
+        "subject": "=today summary",
+        "emailType": "text",
+        "message": "=<h2>📬 Summary of All Emails Today</h2>\n{{ $json.fullSummary }}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        860,
+        100
+      ],
+      "id": "d189ffe0-ad39-4155-adb9-540d01d15acb",
+      "name": "send summary email",
+      "webhookId": "4392c717-a76a-4d38-82f8-75b2a5bf4ffe",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5ofpG6ccgEiSWjVi",
+          "name": "mail unread"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api-inference.huggingface.co/models/philschmid/bart-large-cnn-samsum",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "huggingFaceApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"inputs\": \"{{ $json.prompt }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        100
+      ],
+      "id": "517171a7-0f32-4aa1-8964-7e47d4894a26",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 10,
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "CaA90BV401BVBT03",
+          "name": "HuggingFaceApi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nreturn [{\n  json: {\n    fullSummary: items.map(item => {\n      const subject = item.json.subject || \"📌 No Subject\";\n      const sender = item.json.sender || \"Unknown Sender\";\n      const summary = item.json.summary_text || \"No summary available\";\n\n      return `\n        <h3>${subject}</h3>\n        <p><strong>From:</strong> ${sender}</p>\n        <p>${summary}</p>\n      `;\n    }).join(\"<hr/>\")\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        100
+      ],
+      "id": "cc15ce6d-9100-40cf-b828-131c7859f6f0",
+      "name": "Code1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send summary email": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "send summary email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cafab2cc-c903-40a4-8b4e-40b640d6e50c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ba56cf183b98591d4589a2590b78d3a9bc023c37619cc40dfc84c86ff26c7879"
+  },
+  "id": "ekrj2eYqiG6El2Wa",
+  "tags": []
+}
