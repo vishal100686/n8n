@@ -1,0 +1,702 @@
+{
+  "name": "EMAIL. RESPONDER",
+  "nodes": [
+    {
+      "parameters": {
+        "inputText": "=subject:{{ $json.Subject }}\nemail body:{{ $json.snippet }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "PROMOTION",
+              "description": "Any email trying to sell me something EITHER COURSE, PRODUCT,"
+            },
+            {
+              "category": "HIGH PROIRITY ",
+              "description": "[\"urgent\", \"immediate attention\", \"critical\", \"deadline\", \"payment due\", \"action required\", \"security alert\", \"emergency\", \"final notice\", \"important update\""
+            },
+            {
+              "category": "SPAM MAIL",
+              "description": "Unwanted or unsolicited emails ,course offer, DISCOUNTS "
+            },
+            {
+              "category": "SOCIAL_MAIL",
+              "description": "LINKEDIN . YOU TUBE FACE BOOK"
+            },
+            {
+              "category": "BANK",
+              "description": "mail from bank ,TRANACTION"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        -2060,
+        120
+      ],
+      "id": "154830b3-922a-4ef9-948f-b5a242df9209",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-exp",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1972,
+        340
+      ],
+      "id": "bc7ddbf4-3653-4cff-9850-031e3d3709ff",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MCvXz9FU643xkKhA",
+          "name": "Google Gemini(PaLM) Api account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2280,
+        120
+      ],
+      "id": "897a5b45-cdd8-4890-9178-e199f7b9a442",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5ofpG6ccgEiSWjVi",
+          "name": "mail unread"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_2614516188285513959"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1684,
+        120
+      ],
+      "id": "de3d77c9-aa9d-45ad-8f52-4697007f960b",
+      "name": "SPAM",
+      "webhookId": "42d3a0a2-8b1e-4ee4-a40d-5da59e29abca",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5ofpG6ccgEiSWjVi",
+          "name": "mail unread"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_1"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1684,
+        520
+      ],
+      "id": "7b3d2e71-7db6-4f11-bda2-08874b939ae7",
+      "name": "BANK",
+      "webhookId": "a483e22c-7724-4320-83c3-8a77a9225218",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5ofpG6ccgEiSWjVi",
+          "name": "mail unread"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_1211485630366485373"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1684,
+        -680
+      ],
+      "id": "8a65456e-4623-44a1-9d94-15cc6876792b",
+      "name": "PROMOTION",
+      "webhookId": "3d7cddfa-d222-4333-85e7-3dba7777b37b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5ofpG6ccgEiSWjVi",
+          "name": "mail unread"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_632240814129886442"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1684,
+        -280
+      ],
+      "id": "07d85a11-2a5f-489b-aca7-25b1e26490f8",
+      "name": "HIGH PROIRITY",
+      "webhookId": "2459ce62-9956-4f3a-9cd5-f6081097ddbe",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5ofpG6ccgEiSWjVi",
+          "name": "mail unread"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_2051414576050045188"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1684,
+        320
+      ],
+      "id": "6b379e29-0de2-4d7f-b660-db2316202e2d",
+      "name": "SOCIAL_MAIL",
+      "webhookId": "0e4c1543-2ba6-47fd-944a-e69c51f98d7c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5ofpG6ccgEiSWjVi",
+          "name": "mail unread"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI email assistant. Your job is to read incoming emails and provide polite, professional, and context-aware responses.\n\n### Instructions:\n1. **Understand** the email content.\n2. **Analyze** the sender's intent (e.g., inquiry, complaint, request, follow-up).\n3. **Generate** a concise, well-structured response.\n4. **Use** a polite and professional tone.\n5. **Provide additional details** if necessary, but keep the response short and relevant.\n\n### Example Email:{{ $('Text Classifier').item.json.snippet }}\n\n\n### Respond Professionally:\n- Start with a greeting (e.g., \"Dear [Sender's Name],\")\n- Acknowledge the email content.\n- Provide a clear and relevant response.\n- End with a polite closing.\n\n### Response:\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -1464,
+        -380
+      ],
+      "id": "e607b6aa-93c2-4bf2-aa18-4b0f9aa56028",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite-preview-02-05",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1376,
+        -160
+      ],
+      "id": "177dbc4e-d8eb-441b-81dc-d72f3fe9d1aa",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "epKUk9Wj182C2hIo",
+          "name": "Google Gemini(PaLM) Api account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.From }}",
+        "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1088,
+        -280
+      ],
+      "id": "43f1dc0d-be4a-4bdf-b6ff-9989d558e411",
+      "name": "Gmail2",
+      "webhookId": "c20ddd9a-52f1-4d2f-8b7c-c616278a44d0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5ofpG6ccgEiSWjVi",
+          "name": "mail unread"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI email assistant. Your job is to read incoming emails and provide polite, professional, and context-aware responses.\n\n### Instructions:\n1. **Understand** the email content.\n2. **Analyze** the sender's intent (e.g., inquiry, complaint, request, follow-up).\n3. **Generate** a concise, well-structured response.\n4. **Use** a polite and professional tone.\n5. **Provide additional details** if necessary, but keep the response short and relevant.\n\n### Example Email:{{ $('Text Classifier').item.json.snippet }}\n\n\n### Respond Professionally:\n- Start with a greeting (e.g., \"Dear [Sender's Name],\")\n- Acknowledge the email content.\n- Provide a clear and relevant response.\n- End with a polite closing.\n\n### Response:\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -1464,
+        520
+      ],
+      "id": "6acfb103-a0b7-4417-a36c-542a7fb61f14",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite-preview-02-05",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1376,
+        740
+      ],
+      "id": "950a523c-8a6c-4834-bcec-4aa6fa098de6",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "epKUk9Wj182C2hIo",
+          "name": "Google Gemini(PaLM) Api account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "7522959264",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1088,
+        520
+      ],
+      "id": "658162f8-8f75-406a-8c49-97086eb022b4",
+      "name": "Telegram",
+      "webhookId": "b9646d28-dc79-4617-80b4-600070e5fee2",
+      "credentials": {
+        "telegramApi": {
+          "id": "vidhCGDzfXzN9x3E",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.From }}",
+        "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+        "emailType": "text",
+        "message": "={{ $('AI Agent1').item.json.output }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -868,
+        520
+      ],
+      "id": "2d88e3b5-4962-4ec3-83a8-6de765220350",
+      "name": "Gmail",
+      "webhookId": "b400f99f-f970-40cf-b062-ed4a50b7335c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5ofpG6ccgEiSWjVi",
+          "name": "mail unread"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "==You are an AI assistant. Your task is to read and understand the email content and generate a concise and clear summary of the key points.\n\n### Email Body:\n{{ $('Text Classifier').item.json.snippet }}\n\n### Summary:",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -1464,
+        -780
+      ],
+      "id": "a015bd8a-dc39-420f-85c6-c0a287769c23",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite-preview-02-05",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1376,
+        -560
+      ],
+      "id": "21bb95ff-c13a-447e-a8e3-ee27b09556bb",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "epKUk9Wj182C2hIo",
+          "name": "Google Gemini(PaLM) Api account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7522959264",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1088,
+        -680
+      ],
+      "id": "3c5affe4-3ecb-4a1c-b5de-45bdc804f1f4",
+      "name": "Telegram1",
+      "webhookId": "cf9daa5f-87ca-441a-aa9c-0fbe371ebc30",
+      "credentials": {
+        "telegramApi": {
+          "id": "vidhCGDzfXzN9x3E",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI email assistant. Your job is to read incoming emails and provide polite, professional, and context-aware responses.\n\n### Instructions:\n1. **Understand** the email content.\n2. **Analyze** the sender's intent (e.g., inquiry, complaint, request, follow-up).\n3. **Generate** a concise, well-structured response.\n4. **Use** a polite and professional tone.\n5. **Provide additional details** if necessary, but keep the response short and relevant.\n\n### Example Email:{{ $('Text Classifier').item.json.snippet }}\n\n\n### Respond Professionally:\n- Start with a greeting (e.g., \"Dear [Sender's Name],\")\n- Acknowledge the email content.\n- Provide a clear and relevant response.\n- End with a polite closing.\n\n### Response:\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -1464,
+        20
+      ],
+      "id": "b40d6212-2e47-4479-93eb-b0a270605af8",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite-preview-02-05",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1376,
+        240
+      ],
+      "id": "1d58afa9-01d6-4f0c-9c87-9ea84de7b22a",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "epKUk9Wj182C2hIo",
+          "name": "Google Gemini(PaLM) Api account 8"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "=7522959264",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1088,
+        120
+      ],
+      "id": "c40b5646-c76b-455f-b0c9-2312a0fc3848",
+      "name": "Telegram2",
+      "webhookId": "5a87a5b3-bdb8-4832-be7f-2c8ce5b4f793",
+      "credentials": {
+        "telegramApi": {
+          "id": "vidhCGDzfXzN9x3E",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "PROMOTION",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HIGH PROIRITY",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SPAM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SOCIAL_MAIL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "BANK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SPAM": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BANK": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PROMOTION": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HIGH PROIRITY": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Gmail2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SOCIAL_MAIL": {
+      "main": [
+        []
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram2": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "c7c12743-8536-487c-957b-4b38181f0dde",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ba56cf183b98591d4589a2590b78d3a9bc023c37619cc40dfc84c86ff26c7879"
+  },
+  "id": "ayJRsHvu8hz7XPfj",
+  "tags": []
+}
